@@ -8,6 +8,7 @@ struct Student{
     int Fee_payed;
     int Fee_remaining;
     int installment;
+    int Marks;
 };
 struct Course{
     char course_name[50];
@@ -23,11 +24,13 @@ int main(){
     printf("1.Add New Student\n");
     printf("2.Add New Course\n");
     printf("3.View all Course\n");
-    printf("4.Edit Course\n");
-    printf("5.Fee installment\n");
-    printf("6.Grades of Student\n");
-    printf("7.Remove student\n");
-    printf("8.Remove division\n");
+    printf("4.View all Student\n");
+    printf("5.Edit Course\n");
+    printf("6.Edit Student\n");
+    printf("7.Fee installment\n");
+    printf("8.Grades of Student\n");
+    printf("9.Remove student\n");
+    printf("10.Remove Course\n");
     printf("0.Exit\n");
     printf("Your choice: ");
     scanf("%d",&choice);
@@ -40,9 +43,33 @@ int main(){
     {
         Add_Course();
     }
+    if(choice == 3)
+    {
+        View_All_Course();
+    }
+    if(choice == 4)
+    {
+        View_All_Student();
+    }
     if(choice == 5)
     {
+        Edit_Course();
+    }
+    if(choice == 6)
+    {
+        Edit_Student();
+    }
+    if(choice == 7)
+    {
         Fee_Installment();
+    }
+    if(choice == 9)
+    {
+        Remove_Student();
+    }
+    if(choice == 10)
+    {
+        Remove_Course();
     }
     return 0;
 }
@@ -71,6 +98,7 @@ void Add_Student()
     printf("Enter Student Course name: ");
     fgets(s[No_of_student].course,sizeof(s[No_of_student].course),stdin);
     s[No_of_student].course[strcspn(s[No_of_student].course,"\n")] = '\0';
+    s[No_of_course].Marks = 0;
     //fees managment.
     int fees_given;
     for (int i = 0; i < No_of_course; i++)
@@ -142,11 +170,33 @@ void View_All_Course()
     {
         printf("%-10s | %-10d | %-5d",c[i].course_name,c[i].course_fee,c[i].strength);
     }
+    fclose(fc);
 }
+
+void View_All_Student()
+{
+    //creating file if its not there.
+    FILE *fs = fopen("student.dat","ab");
+    fs = fopen("student.dat","rb");
+    int No_of_student = 0; // No of course default value.
+    struct Student s[100]; // making arry of course structure.
+    No_of_student = fread(s,sizeof(struct Course),100,fs); // reading from file and storing no of course value.
+    //Printing Output.
+    printf("\n------------------------------------------------------------\n");
+    printf("%-10s | %-10s | %-5s","Student Name","Course","Fees Remmaining");
+    printf("\n------------------------------------------------------------\n");
+    for (int i = 0; i < No_of_student; i++)
+    {
+        printf("%-10s | %-10s | %-5d",s[i].name,s[i].course,s[i].Fee_remaining);
+    }
+    fclose(fs);
+}
+
 void Edit_Course()
 {
     //creating file if its not there.
     FILE *fc = fopen("course.dat","ab");
+    FILE *temp = fopen("temp.dat","ab");
     fc = fopen("course.dat","rb");
     int No_of_course = 0; // No of course default value.
     char edit_course_name[50];
@@ -165,14 +215,224 @@ void Edit_Course()
             printf("what field you want to change: \n");
             printf("1.Course name\n");
             printf("2.Course fee\n");
+            printf("0.Exit\n");
             printf("your choice: ");
             scanf("%d",&changing_field);
             if(changing_field==1)
             {
-                
+                printf("Enter new Course name: ");
+                fgets(c[i].course_name,sizeof(c[i].course_name),stdin);
+                c[i].course_name[strcspn(c[i].course_name,"\n")]='\0';
             }
+            else if(changing_field==2)
+            {
+                printf("Enter new Course Fee: ");
+                scanf("%d",&c[i].course_fee);
+            }
+            else if(changing_field==0)
+            {
+                return;
+            }
+            else
+            {
+                printf("Invalid Iput");
+                return;
+            }
+            fwrite(&c[i],sizeof(struct Course),1,temp);
         }
     }
+    fclose(temp);
+    fclose(fc);
+    remove("course.dat");
+    rename("temp.dat","course.dat");
+    printf("Course Updated Sucessfully.");
+}
+
+void Edit_Student()
+{
+    //creating file if its not there.
+    FILE *fs = fopen("student.dat","ab");
+    FILE *temp = fopen("temp.dat","ab");
+    fs = fopen("student.dat","rb");
+    int No_of_student = 0; // No of student default value.
+    char edit_student_name[50];
+    struct Student s[100]; // making arry of student structure.
+    No_of_student = fread(s,sizeof(struct Student),100,fs); // reading from file and storing no of student value.
+    View_All_Course();
+    //Editing Course.
+    printf("Enter Student name You want to Edit: ");
+    fgets(edit_student_name,sizeof(edit_student_name),stdin);
+    edit_student_name[strcspn(edit_student_name,"\n")]='\0';
+    for (int i = 0; i < No_of_student; i++)
+    {
+        if(strcmp(edit_student_name,s[i].name)==0)
+        {
+            int changing_field;
+            printf("what field you want to change: \n");
+            printf("1.Student name\n");
+            printf("2.student course\n");
+            printf("0.Exit\n");
+            printf("your choice: ");
+            scanf("%d",&changing_field);
+            if(changing_field==1)
+            {
+                printf("Enter new Student name: ");
+                fgets(s[i].name,sizeof(s[i].name),stdin);
+                s[i].name[strcspn(s[i].name,"\n")]='\0';
+            }
+            else if(changing_field==2)
+            {
+                printf("Enter new Course: ");
+                scanf("%d",&s[i].course);
+            }
+            else if(changing_field==0)
+            {
+                return;
+            }
+            else
+            {
+                printf("Invalid Iput");
+                return;
+            }
+            fwrite(&s[i],sizeof(struct Student),1,temp);
+        }
+    }
+    fclose(temp);
+    fclose(fs);
+    remove("student.dat");
+    rename("temp.dat","student.dat");
+    printf("Student details Updated Sucessfully.");
+}
+
+void Grades_of_Student()
+{
+    //creating file if its not there.
+    FILE *fs = fopen("student.dat","ab");
+    FILE *temp = fopen("temp.dat","ab");
+    fs = fopen("student.dat","rb");
+    int No_of_student = 0; // No of student default value.
+    char edit_student_name[50];
+    struct Student s[100]; // making arry of student structure.
+    No_of_student = fread(s,sizeof(struct Student),100,fs); // reading from file and storing no of student value.
+    View_All_Course();
+    //Editing Course.
+    printf("Enter Student name You want to add marks: ");
+    fgets(edit_student_name,sizeof(edit_student_name),stdin);
+    edit_student_name[strcspn(edit_student_name,"\n")]='\0';
+    for (int i = 0; i < No_of_student; i++)
+    {
+        if(strcmp(edit_student_name,s[i].name)==0)
+        {
+            
+            fwrite(&s[i],sizeof(struct Student),1,temp);
+        }
+    }
+    fclose(temp);
+    fclose(fs);
+    remove("student.dat");
+    rename("temp.dat","student.dat");
+    printf("Student details Updated Sucessfully.");
+}
+
+void Remove_Course()
+{
+    //creating file if its not there.
+    FILE *fc = fopen("course.dat","ab");
+    FILE *temp = fopen("temp.dat","ab");
+    fc = fopen("course.dat","rb");
+    int No_of_course = 0; // No of course default value.
+    char remove_course_name[50];
+    struct Course c[100]; // making arry of course structure.
+    No_of_course = fread(c,sizeof(struct Course),100,fc); // reading from file and storing no of course value.
+    View_All_Course();
+    //Editing Course.
+    printf("Enter Course name You want to remove: ");
+    fgets(remove_course_name,sizeof(remove_course_name),stdin);
+    remove_course_name[strcspn(remove_course_name,"\n")]='\0';
+    for (int i = 0; i < No_of_course; i++)
+    {
+        if(strcmp(remove_course_name,c[i].course_name)==0)
+        {
+            char sure_remove;
+            printf("Are u surely want to remove this course.[y/n]: ");
+            scanf(" %c",&sure_remove);
+            if(sure_remove=='y')
+            {
+                continue;
+            }
+            else
+            {
+                fwrite(&c[i],sizeof(struct Course),1,temp);
+            }
+        }
+        fwrite(&c[i],sizeof(struct Course),1,temp);
+    }
+    fclose(temp);
+    fclose(fc);
+    remove("course.dat");
+    rename("temp.dat","course.dat");
+    printf("Course Updated Sucessfully.");
+}
+
+void Remove_Student()
+{
+    //creating file if its not there.
+    FILE *fs = fopen("student.dat","ab");
+    FILE *fc = fopen("course.dat","ab");
+    FILE *temp = fopen("temp.dat","ab");
+    FILE *temp2 = fopen("temp2.dat","ab");
+    fs = fopen("student.dat","rb");
+    fc = fopen("course.dat","rb");
+    int No_of_student = 0; // No of student default value.
+    int No_of_course = 0; // No of course default value.
+    char remove_student_name[50];
+    struct Student s[100]; // making arry of student structure.
+    struct Course c[100]; // making arry of course structure.
+    No_of_student = fread(s,sizeof(struct Student),100,fs); // reading from file and storing no of student value.
+    No_of_course = fread(c,sizeof(struct Course),100,fc); // reading from file and storing no of course value.
+    View_All_Student();
+    //Editing Course.
+    printf("Enter Student name You want to remove: ");
+    fgets(remove_student_name,sizeof(remove_student_name),stdin);
+    remove_student_name[strcspn(remove_student_name,"\n")]='\0';
+    for (int i = 0; i < No_of_student; i++)
+    {
+        if(strcmp(remove_student_name,s[i].name)==0)
+        {
+            char sure_remove;
+            printf("Are u surely want to remove this student.[y/n]: ");
+            scanf(" %c",&sure_remove);
+            if(sure_remove=='y')
+            {
+                for (int j = 0; j < No_of_course; j++)
+                {
+                    if(s[i].course==c[j].course_name)
+                    {
+                        c[j].strength--;
+                    }
+                }
+                continue;
+            }
+            else
+            {
+                fwrite(&s[i],sizeof(struct Student),1,temp);
+            }
+        }
+        fwrite(&s[i],sizeof(struct Student),1,temp);
+    }
+    for (int j = 0; j < No_of_course; j++)
+    {
+        fwrite(&c[j],sizeof(struct Course),1,temp2);
+    }
+    fclose(temp);
+    fclose(temp2);
+    fclose(fs);
+    fclose(fc);
+    remove("student.dat");
+    remove("course.dat");
+    rename("temp.dat","student.dat");
+    rename("temp2.dat","course.dat");
+    printf("Student removed Sucessfully.");
 }
 
 void Fee_Installment()
