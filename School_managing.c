@@ -312,6 +312,7 @@ void Edit_Student()
             scanf("%d",&changing_field);
             if(changing_field==1)
             {
+                getchar();
                 printf("Enter new Student name: ");
                 fgets(s[i].name,sizeof(s[i].name),stdin);
                 s[i].name[strcspn(s[i].name,"\n")]='\0';
