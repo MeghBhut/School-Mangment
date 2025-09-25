@@ -17,7 +17,7 @@ struct Course{
 };
 
 int main(){
-    printf("Welcome to School Managing System."); // taking input action from user.
+    printf("Welcome To School Managing System."); // taking input action from user.
     while (1)
     {
         int choice;
